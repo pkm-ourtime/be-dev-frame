@@ -18,13 +18,14 @@ const categoryRoutes = require('./app/routes/categoryRoutes');
 const userRoutes = require('./app/routes/userRoutes');
 const fileRoutes = require('./app/routes/fileRoutes');
 const cartRoutes = require('./app/routes/cartRoutes');
+const orderRoutes = require('./app/routes/orderRoutes');
 
 app.use('/products', productRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/users', userRoutes);
 app.use('/files', fileRoutes);
 app.use('/cart', cartRoutes);
-app.use('')
+app.use('/order', orderRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
