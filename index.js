@@ -19,6 +19,7 @@ const userRoutes = require('./app/routes/userRoutes');
 const fileRoutes = require('./app/routes/fileRoutes');
 const cartRoutes = require('./app/routes/cartRoutes');
 const orderRoutes = require('./app/routes/orderRoutes');
+const reviewRoutes = require('./app/routes/reviewRoutes');
 
 app.use('/products', productRoutes);
 app.use('/categories', categoryRoutes);
@@ -26,6 +27,7 @@ app.use('/users', userRoutes);
 app.use('/files', fileRoutes);
 app.use('/cart', cartRoutes);
 app.use('/order', orderRoutes);
+app.use('/review', reviewRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
