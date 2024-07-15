@@ -1,58 +1,71 @@
 const Order = require('../models/Order');
+const Cart = require('../models/Cart');
 
 class OrderController {
-  static async getAllOrders(req, res) {
-    try {
-      const orders = await Order.find().populate('user').populate('items.product');
-      res.json(orders);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
-
   static async createOrder(req, res) {
     try {
-      const { items } = req.body;
       const userId = req.user.id;
+      const cartItems = await Cart.find({ user: userId }).populate('product');
+
+      if (!cartItems.length) {
+        return res.status(400).json({ message: 'No items in cart' });
+      }
+
+      const totalAmount = cartItems.reduce((total, item) => {
+        return total + (item.product.price * item.quantity);
+      }, 0);
 
       const newOrder = new Order({
-        items: items,
         user: userId,
+        items: cartItems.map(item => item._id),
+        totalAmount,
+        status: 'pending',
       });
 
       await newOrder.save();
+
+      await Cart.deleteMany({ user: userId });
+
       res.status(201).json(newOrder);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   }
 
-  static async getOrderById(req, res) {
+  static async getOrder(req, res) {
     try {
-      const orderId = req.params.id;
-      const order = await Order.findById(orderId).populate('user').populate('items.product');
+      const userId = req.user.id;
 
-      if (!order) {
-        return res.status(404).json({ message: 'Order not found' });
-      }
+      const orders = await Order.find({ user: userId }).populate('user').populate({
+        path: 'items',
+        populate: {
+          path: 'product'
+        }
+      });
 
-      res.json(order);
+      res.json(orders);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   }
 
-  static async updateOrder(req, res) {
+  static async updateOrderStatus(req, res) {
     try {
       const orderId = req.params.id;
-      const { items } = req.body;
-      const updatedOrder = await Order.findByIdAndUpdate(orderId, { items: items }, { new: true });
+      const { status } = req.body;
 
-      if (!updatedOrder) {
+      const order = await Order.findById(orderId);
+
+      if (!order) {
         return res.status(404).json({ message: 'Order not found' });
       }
 
-      res.json(updatedOrder);
+      order.status = status;
+      order.updatedAt = Date.now();
+
+      await order.save();
+
+      res.json(order);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
@@ -61,11 +74,14 @@ class OrderController {
   static async deleteOrder(req, res) {
     try {
       const orderId = req.params.id;
-      const deletedOrder = await Order.findByIdAndDelete(orderId);
 
-      if (!deletedOrder) {
+      const order = await Order.findById(orderId);
+
+      if (!order) {
         return res.status(404).json({ message: 'Order not found' });
       }
+
+      await Order.deleteOne({ _id: orderId });
 
       res.json({ message: 'Order deleted' });
     } catch (error) {
