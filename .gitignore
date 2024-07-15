@@ -1,0 +1,43 @@
+# Dependency directories
+/node_modules
+
+# package-lock
+package-lock.json
+
+# Optional npm cache directory
+.npm
+
+# Environment file
+.env
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Debug files
+.debug
+
+# Editor directories and files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Mac specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
+
+# Production build
+/build
+
+# Temporary files
+*.tmp
