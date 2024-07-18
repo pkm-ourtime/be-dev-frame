@@ -6,7 +6,7 @@ const MulterConfig = require('../../config/multer');
 const router = express.Router();
 const upload = MulterConfig.getUploader();
 
-router.post('/upload', AuthMiddleware, upload.single('file'), FileController.uploadFile);
-router.delete('/delete/:fileName', AuthMiddleware, FileController.deleteFile);
+router.post('/upload', AuthMiddleware(['admin', 'user']), upload.single('file'), FileController.uploadFile);
+router.delete('/delete/:fileName', AuthMiddleware(['admin', 'user']), FileController.deleteFile);
 
 module.exports = router;
