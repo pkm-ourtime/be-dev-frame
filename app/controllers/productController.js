@@ -59,8 +59,8 @@ class ProductController {
       if (req.body.image_url != null) {
         product.image_url = req.body.image_url;
       }
-      if (req.body.category_id != null) {
-        product.category_id = req.body.category_id;
+      if (req.body.category != null) {
+        product.category = req.body.category;
       }
       if (req.body.external_link != null) {
         product.external_link = req.body.external_link;
