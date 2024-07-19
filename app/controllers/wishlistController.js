@@ -39,7 +39,7 @@ class WishlistController {
   static async removeProductFromWishlist(req, res) {
     try {
       const userId = req.user.id;
-      const { productId } = req.body;
+      const { productId } = req.params.productId;
 
       const wishlist = await Wishlist.findOne({ user: userId });
 
