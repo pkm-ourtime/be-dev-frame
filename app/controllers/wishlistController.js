@@ -41,7 +41,7 @@ class WishlistController {
       const userId = req.user.id;
       const productId = req.params.productId;
 
-      const wishlist = await Wishlist.findOne({ user: userId });
+      const wishlist = await Wishlist.findOne({ user: userId }).populate('products');
 
       if (!wishlist) {
         return res.status(404).json({ message: 'Wishlist not found' });

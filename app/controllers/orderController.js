@@ -26,7 +26,14 @@ class OrderController {
 
       await Cart.deleteMany({ user: userId });
 
-      res.status(201).json(newOrder);
+      const createdOrder = Order.findById({ _id: newOrder._id }.populate('user').populate({
+        path: 'items',
+        populate: {
+          path: 'product'
+        }
+      }));      
+
+      res.status(201).json(createdOrder);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
