@@ -2,40 +2,72 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 
 class OrderController {
-  static async createOrder(req, res) {
-    try {
-      const userId = req.user.id;
-      const cartItems = await Cart.find({ user: userId }).populate('product');
+  static async checkoutFromCart(req, res) {
+    const userId = req.user.id;
 
-      if (!cartItems.length) {
-        return res.status(400).json({ message: 'No items in cart' });
+    try {
+        const cartItems = await Cart.find({ user: userId }).populate('product');
+
+        if (cartItems.length === 0) {
+          return res.status(400).json({ message: 'Cart is empty' });
+        }
+
+        let totalAmount = 0;
+        const orderItems = cartItems.map(item => {
+          totalAmount += item.product.price * item.quantity;
+          return {
+            product: item.product._id,
+            quantity: item.quantity,
+          };
+        });
+
+        const newOrder = new Order({
+          user: userId,
+          items: orderItems,
+          totalAmount: totalAmount,
+          status: 'pending',
+        });
+
+        await newOrder.save();
+
+        await Cart.deleteMany({ user: userId });
+
+        res.status(201).json(newOrder);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+  }
+
+  static async buyNow(req, res) {
+    const { productId, quantity } = req.body;
+    const userId = req.user.id;
+
+    if (!productId || !quantity) {
+      return res.status(400).json({ message: 'Product ID and quantity are required.' });
+    }
+
+    try {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
       }
 
-      const totalAmount = cartItems.reduce((total, item) => {
-        return total + (item.product.price * item.quantity);
-      }, 0);
+      const totalAmount = product.price * quantity;
 
       const newOrder = new Order({
         user: userId,
-        items: cartItems.map(item => item._id),
-        totalAmount,
-        status: 'pending',
+        items: [{
+          product: productId,
+          quantity: quantity,
+        }],
+        totalAmount: totalAmount,
+        status: 'pending'
       });
 
       await newOrder.save();
-
-      await Cart.deleteMany({ user: userId });
-
-      const createdOrder = Order.findById({ _id: newOrder._id }.populate('user').populate({
-        path: 'items',
-        populate: {
-          path: 'product'
-        }
-      }));      
-
-      res.status(201).json(createdOrder);
+      res.status(201).json(newOrder);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      res.status(500).json({ message: 'Server Error' });
     }
   }
 
