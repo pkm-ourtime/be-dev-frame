@@ -7,35 +7,35 @@ class OrderController {
     const userId = req.user.id;
 
     try {
-        const cartItems = await Cart.find({ user: userId }).populate('product');
+      const cartItems = await Cart.find({ user: userId }).populate('product');
 
-        if (cartItems.length === 0) {
-          return res.status(400).json({ message: 'Cart is empty' });
-        }
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: 'Cart is empty' });
+      }
 
-        let totalAmount = 0;
-        const orderItems = cartItems.map(item => {
-          totalAmount += item.product.price * item.quantity;
-          return {
-            product: item.product._id,
-            quantity: item.quantity,
-          };
-        });
+      let totalAmount = 0;
+      const orderItems = cartItems.map(item => {
+        totalAmount += item.product.price * item.quantity;
+        return {
+          product: item.product._id,
+          quantity: item.quantity,
+        };
+      });
 
-        const newOrder = new Order({
-          user: userId,
-          items: orderItems,
-          totalAmount: totalAmount,
-          status: 'pending',
-        });
+      const newOrder = new Order({
+        user: userId,
+        items: orderItems,
+        totalAmount: totalAmount,
+        status: 'pending',
+      });
 
-        await newOrder.save();
+      await newOrder.save();
 
-        await Cart.deleteMany({ user: userId });
+      await Cart.deleteMany({ user: userId });
 
-        res.status(201).json(newOrder);
+      res.status(201).json(newOrder);
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+      res.status(500).json({ message: 'Server Error' });
     }
   }
 
