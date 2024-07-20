@@ -13,7 +13,8 @@ class CartController {
             });
 
             await newCartItem.save();
-            res.status(201).json(newCartItem);
+            const addedCartItem = await Cart.findById(newCartItem._id).populate('product');
+            res.status(201).json(addedCartItem);
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
@@ -42,8 +43,9 @@ class CartController {
 
             cartItem.quantity = quantity;
             await cartItem.save();
+            const updatedCartItem = await Cart.findById(cartItemId).populate('product');
 
-            res.json(cartItem);
+            res.json(updatedCartItem);
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
@@ -53,7 +55,7 @@ class CartController {
         const cartItemId = req.params.id;
 
         try {
-            const deletedCartItem = await Cart.findOneAndDelete({ _id: cartItemId });
+            const deletedCartItem = await Cart.findOneAndDelete({ _id: cartItemId }).populate('product');
             if (!deletedCartItem) {
                 return res.status(404).json({ message: 'Cart item not found' });
             }
