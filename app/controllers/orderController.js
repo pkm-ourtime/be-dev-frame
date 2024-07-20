@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
+const Product = require('../models/Product');
 
 class OrderController {
   static async checkoutFromCart(req, res) {
@@ -39,13 +40,13 @@ class OrderController {
   }
 
   static async buyNow(req, res) {
-    const { productId, quantity } = req.body;
     const userId = req.user.id;
+    const { productId, quantity } = req.body;
 
     if (!productId || !quantity) {
       return res.status(400).json({ message: 'Product ID and quantity are required.' });
     }
-
+    
     try {
       const product = await Product.findById(productId);
       if (!product) {
@@ -67,7 +68,7 @@ class OrderController {
       await newOrder.save();
       res.status(201).json(newOrder);
     } catch (error) {
-      res.status(500).json({ message: 'Server Error' });
+      res.status(500).json({ message: error.message });
     }
   }
 
