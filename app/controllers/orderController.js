@@ -74,9 +74,7 @@ class OrderController {
 
   static async getOrder(req, res) {
     try {
-      const userId = req.user.id;
-
-      const orders = await Order.find({ user: userId }).populate('user').populate({
+      const orders = await Order.find().populate('user').populate({
         path: 'items',
         populate: {
           path: 'product'
